@@ -1,8 +1,8 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
-import csv
+from systems.base import BaseMemory
 
-class CosineMemory:
+class CosineMemory(BaseMemory):
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
         self.model = SentenceTransformer(model_name)
         self.memories = []
@@ -34,3 +34,6 @@ class CosineMemory:
 
         top_1_index = np.argmax(scores)
         return self.memories[top_1_index]
+
+    def get_all_embeddings(self) -> np.ndarray:
+        return self.embeddings
