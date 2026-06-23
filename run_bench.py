@@ -10,6 +10,7 @@ from benchmarks.runner import EvaluationRunner
 from systems.cosine_memory import CosineMemory
 from systems.faiss_memory import FaissMemory
 from metrics.anisotropy import calculate_geometry_metrics
+from metrics.hubness import calculate_hubness_metrics
 
 
 def load_dataset(filepath: str) -> list[dict]:
@@ -45,14 +46,23 @@ def main():
     raw_vectors = registry[1]["instance"].get_all_embeddings() 
 
     geom = calculate_geometry_metrics(raw_vectors)
+    hubby = calculate_hubness_metrics(raw_vectors, k=3)
     
-    print("\n" + "=" * 50)
-    print("        DATASET EMBEDDING GEOMETRY         ")
-    print("=" * 50)
-    print(f"Dominant Axis Vector length: {geom['largest_eigenvalue']:.4f}")
-    print(f"Anisotropy Space Ratio:      {geom['anisotropy_ratio']:.2f}x")
-    print(f"Matrix Condition Number:     {geom['condition_number']:.2f}")
-    print("=" * 50 + "\n")
+    print("\n" + "=" * 55)
+    print("        VECTOR SPACE GEOMETRY & HEALTH REPORT        ")
+    print("=" * 55)
+    print(f"Space Shape Status (Anisotropy):")
+    print(f"   Dominant Axis Magnitude:    {geom['largest_eigenvalue']:.4f}")
+    print(f"   Anisotropy Space Ratio:     {geom['anisotropy_ratio']:.2f}x")
+    print(f"   Matrix Condition Number:    {geom['condition_number']:.2f}")
+    print("-" * 55)
+    print(f"Nearest-Neighbor Hubness Status:")
+    if "error" in hubby:
+        print(f"   {hubby['error']}")
+    else:
+        print(f"   Max Appearance of One Hub:  {hubby['max_neighbor_appearances']} times")
+        print(f"   Hubness Skewness Profile:   {hubby['hubness_skewness']:.3f}")
+    print("=" * 55 + "\n")
 
 if __name__ == "__main__":
     main()
